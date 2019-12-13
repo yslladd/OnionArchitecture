@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using OnionArchitecture.Infra.Data.DataContext;
 
 namespace OnionArchitecture.Web
 {
@@ -23,12 +25,23 @@ namespace OnionArchitecture.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<OAContext>(options => options.UseSqlServer(Configuration.GetConnectionString("OAConnectionString")));
             services.AddControllersWithViews();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+            ////referencing data for migrations
+            //using (var migrationSvcScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>()
+            //    .CreateScope())
+            //{
+            //    migrationSvcScope.ServiceProvider.GetService<OnionArchitectureContext>().Database.Migrate();
+            //    // you can also add the data here... let me know if you need I will post it
+            //}
+
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
