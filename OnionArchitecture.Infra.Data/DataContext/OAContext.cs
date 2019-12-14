@@ -7,9 +7,8 @@ using System.Linq;
 namespace OnionArchitecture.Infra.Data.DataContext
 {
     public class OAContext : DbContext
-    {
-        public OAContext(DbContextOptions<OAContext> options)
-        : base(options)
+    {        
+        public OAContext()
         {
         }
 
