@@ -16,6 +16,8 @@ namespace OnionArchitecture.Domain.Entities
 
         public bool isActive { get; set; }
 
+        public virtual IEnumerable<Task> Tasks { get; set; }
+
         public bool IsOldCustomer(Customer customer)
         {
             return customer.isActive && DateTime.Now.Year - customer.CreateDate.Year >= 3;
