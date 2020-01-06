@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OnionArchitecture.Domain.Interfaces
+namespace OnionArchitecture.Domain.Interfaces.Services
 {
-    public interface ICustomerRepository : IRepositoryBase<Customer>
+    public interface ICustomerService : IServiceBase<Customer>
     {
     }
 }

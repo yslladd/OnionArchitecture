@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OnionArchitecture.Domain.Interfaces;
+using OnionArchitecture.Domain.Interfaces.Repositories;
 using OnionArchitecture.Infra.Data.DataContext;
 using System;
 using System.Collections.Generic;

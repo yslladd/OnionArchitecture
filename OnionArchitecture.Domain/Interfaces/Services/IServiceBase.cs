@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OnionArchitecture.Domain.Interfaces
+namespace OnionArchitecture.Domain.Interfaces.Services
 {
-    public interface IRepositoryBase<TEntity> where TEntity : class
+    public interface IServiceBase<TEntity> where TEntity : class
     {
 
         void Add(TEntity obj);

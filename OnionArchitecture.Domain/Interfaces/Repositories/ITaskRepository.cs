@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OnionArchitecture.Domain.Interfaces
+namespace OnionArchitecture.Domain.Interfaces.Repositories
 {
     public interface ITaskRepository : IRepositoryBase<Task>
     {
