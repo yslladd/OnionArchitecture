@@ -11,7 +11,7 @@ namespace OnionArchitecture.Application
         private readonly IServiceBase<TEntity> _serviceBase;
         public AppServiceBase(IServiceBase<TEntity> serviceBase)
         {
-            serviceBase = _serviceBase;
+            _serviceBase = serviceBase;
         }
 
         public void Add(TEntity obj)
