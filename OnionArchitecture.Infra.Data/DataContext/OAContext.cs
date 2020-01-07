@@ -7,14 +7,19 @@ using System.Linq;
 namespace OnionArchitecture.Infra.Data.DataContext
 {
     public class OAContext : DbContext
-    {        
+    {
+        public OAContext(DbContextOptions<OAContext> options)
+            : base(options)
+        {
+        }
+
         public OAContext()
         {
         }
 
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Task> Tasks { get; set; }
-        //public DbSet<TaskStatus> TaskStatus { get; set; }
+        public DbSet<TaskStatus> TaskStatus { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -23,7 +28,7 @@ namespace OnionArchitecture.Infra.Data.DataContext
             modelBuilder.ApplyConfiguration(new TaskConfig());
             modelBuilder.ApplyConfiguration(new TaskStatusConfig());
 
-             
+
             //1 to N (Customer To Tasks)
             modelBuilder.Entity<Task>()
                 .HasOne(p => p.Customer)
@@ -35,7 +40,7 @@ namespace OnionArchitecture.Infra.Data.DataContext
             modelBuilder.Entity<Task>()
                 .HasOne(p => p.TaskStatus)
                 .WithOne(b => b.Task)
-                .HasForeignKey<TaskStatus>(x => x.TaskId);                
+                .HasForeignKey<TaskStatus>(x => x.TaskId);
 
             base.OnModelCreating(modelBuilder);
         }
