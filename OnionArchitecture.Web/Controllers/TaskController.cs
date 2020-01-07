@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using OnionArchitecture.Domain.Entities;
+using Model = OnionArchitecture.Domain.Entities;
 using OnionArchitecture.Infra.Data.DataContext;
 
 namespace OnionArchitecture.Web.Controllers
@@ -57,7 +57,7 @@ namespace OnionArchitecture.Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Description,CreateDate,UpdateDate,DeletedDate,isActive,CustomerId")] Task task)
+        public async Task<IActionResult> Create([Bind("Id,Title,Description,CreateDate,UpdateDate,DeletedDate,isActive,CustomerId")] Model.Task task)
         {
             if (ModelState.IsValid)
             {
@@ -92,7 +92,7 @@ namespace OnionArchitecture.Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Title,Description,CreateDate,UpdateDate,DeletedDate,isActive,CustomerId")] Task task)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Title,Description,CreateDate,UpdateDate,DeletedDate,isActive,CustomerId")] Model.Task task)
         {
             if (id != task.Id)
             {
