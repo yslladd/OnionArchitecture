@@ -15,6 +15,6 @@ namespace OnionArchitecture.Application
             : base(customerService)
         {
             _customerService = customerService;
-        }
+        }        
     }
 }

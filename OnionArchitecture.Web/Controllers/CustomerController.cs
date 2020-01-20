@@ -2,27 +2,31 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using OnionArchitecture.Application.Interface;
+using OnionArchitecture.Application.ViewModel;
 using OnionArchitecture.Domain.Entities;
-using OnionArchitecture.Infra.Data.DataContext;
 
 namespace OnionArchitecture.Web.Controllers
 {
     public class CustomerController : Controller
     {
-        private readonly OAContext _context;
+        private readonly ICustomerAppService _customerAppService;
+        private readonly IMapper _mapper;
 
-        public CustomerController(OAContext context)
+        public CustomerController(ICustomerAppService customerAppService, IMapper mapper)
         {
-            _context = context;
+            _customerAppService = customerAppService;
+            _mapper = mapper;
         }
 
         // GET: Customer
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Customers.ToListAsync());
+            return View(_mapper.Map<IEnumerable<Customer>, IEnumerable<CustomerVM>>(_customerAppService.GetAll()));
         }
 
         // GET: Customer/Details/5
@@ -33,8 +37,7 @@ namespace OnionArchitecture.Web.Controllers
                 return NotFound();
             }
 
-            var customer = await _context.Customers
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var customer = _customerAppService.GetById(id.Value);
             if (customer == null)
             {
                 return NotFound();
@@ -54,13 +57,14 @@ namespace OnionArchitecture.Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Email,CreateDate,isActive")] Customer customer)
+        public async Task<IActionResult> Create([Bind("Id,Name,Email,CreateDate,isActive")] CustomerVM customer)
         {
             if (ModelState.IsValid)
             {
                 customer.Id = Guid.NewGuid();
-                _context.Add(customer);
-                await _context.SaveChangesAsync();
+                var newCustomer = _mapper.Map<CustomerVM, Customer>(customer);
+                _customerAppService.Add(newCustomer);
+
                 return RedirectToAction(nameof(Index));
             }
             return View(customer);
@@ -74,7 +78,7 @@ namespace OnionArchitecture.Web.Controllers
                 return NotFound();
             }
 
-            var customer = await _context.Customers.FindAsync(id);
+            var customer = _customerAppService.GetById(id.Value);
             if (customer == null)
             {
                 return NotFound();
@@ -87,7 +91,7 @@ namespace OnionArchitecture.Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Name,Email,CreateDate,isActive")] Customer customer)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Name,Email,CreateDate,isActive")] CustomerVM customer)
         {
             if (id != customer.Id)
             {
@@ -98,8 +102,9 @@ namespace OnionArchitecture.Web.Controllers
             {
                 try
                 {
-                    _context.Update(customer);
-                    await _context.SaveChangesAsync();
+                    var updateCustomer = _mapper.Map<CustomerVM, Customer>(customer);
+                    _customerAppService.Update(updateCustomer);
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -125,8 +130,7 @@ namespace OnionArchitecture.Web.Controllers
                 return NotFound();
             }
 
-            var customer = await _context.Customers
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var customer = _customerAppService.GetById(id.Value);
             if (customer == null)
             {
                 return NotFound();
@@ -140,15 +144,15 @@ namespace OnionArchitecture.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var customer = await _context.Customers.FindAsync(id);
-            _context.Customers.Remove(customer);
-            await _context.SaveChangesAsync();
+            var customer = _customerAppService.GetById(id);
+
+            _customerAppService.Delete(customer);
             return RedirectToAction(nameof(Index));
         }
 
         private bool CustomerExists(Guid id)
         {
-            return _context.Customers.Any(e => e.Id == id);
+            return _customerAppService.GetById(id) != null;
         }
     }
 }

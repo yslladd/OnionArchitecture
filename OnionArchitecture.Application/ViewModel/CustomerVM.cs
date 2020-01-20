@@ -17,5 +17,7 @@ namespace OnionArchitecture.Application.ViewModel
 
         public DateTime CreateDate { get; set; }
 
+        public bool isActive { get; set; }
+
     }
 }

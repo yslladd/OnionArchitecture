@@ -11,11 +11,7 @@ namespace OnionArchitecture.Infra.Data.DataContext
         public OAContext(DbContextOptions<OAContext> options)
             : base(options)
         {
-        }
-
-        public OAContext()
-        {
-        }
+        }       
 
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Task> Tasks { get; set; }

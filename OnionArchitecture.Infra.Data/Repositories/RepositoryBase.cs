@@ -11,7 +11,11 @@ namespace OnionArchitecture.Infra.Data.Repositories
 {
     public class RepositoryBase<TEntity> : IDisposable, IRepositoryBase<TEntity> where TEntity : class
     {
-        protected OAContext Db = new OAContext();
+        private readonly OAContext Db;
+        public RepositoryBase(OAContext DbContext)
+        {
+            Db = DbContext;
+        }
 
         public void Add(TEntity obj)
         {
@@ -49,7 +53,7 @@ namespace OnionArchitecture.Infra.Data.Repositories
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            Db.Dispose();
         }
 
     }

@@ -6,24 +6,30 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Model = OnionArchitecture.Domain.Entities;
-using OnionArchitecture.Infra.Data.DataContext;
+using OnionArchitecture.Application.Interface;
+using AutoMapper;
+using OnionArchitecture.Application.ViewModel;
+using OnionArchitecture.Domain.Entities;
 
 namespace OnionArchitecture.Web.Controllers
 {
     public class TaskController : Controller
     {
-        private readonly OAContext _context;
+        private readonly ITaskAppService _taskAppService;
+        private readonly IMapper _mapper;
 
-        public TaskController(OAContext context)
+        public TaskController(ITaskAppService taskAppService, IMapper mapper)
         {
-            _context = context;
+            _taskAppService = taskAppService;
+            _mapper = mapper;
         }
 
         // GET: Task
         public async Task<IActionResult> Index()
         {
-            var oAContext = _context.Tasks.Include(t => t.Customer);
-            return View(await oAContext.ToListAsync());
+            //TODO: refactor methods to async all way down
+            var taskVM = _mapper.Map<IEnumerable<Model.Task>, IEnumerable<TaskVM>>(_taskAppService.GetAll());
+            return View(taskVM);
         }
 
         // GET: Task/Details/5
@@ -34,9 +40,7 @@ namespace OnionArchitecture.Web.Controllers
                 return NotFound();
             }
 
-            var task = await _context.Tasks
-                .Include(t => t.Customer)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var task = _taskAppService.GetById(id.Value);
             if (task == null)
             {
                 return NotFound();
@@ -48,7 +52,8 @@ namespace OnionArchitecture.Web.Controllers
         // GET: Task/Create
         public IActionResult Create()
         {
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "Name");
+            var customers = _mapper.Map<IEnumerable<Model.Task>, IEnumerable<TaskVM>>(_taskAppService.GetAll());
+            ViewData["CustomerId"] = new SelectList(customers, "Id", "Name");
             return View();
         }
 
@@ -57,16 +62,17 @@ namespace OnionArchitecture.Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Description,CreateDate,UpdateDate,DeletedDate,isActive,CustomerId")] Model.Task task)
+        public async Task<IActionResult> Create([Bind("Id,Title,Description,CreateDate,UpdateDate,DeletedDate,isActive,CustomerId")] TaskVM task)
         {
             if (ModelState.IsValid)
             {
                 task.Id = Guid.NewGuid();
-                _context.Add(task);
-                await _context.SaveChangesAsync();
+                var newTask = _mapper.Map<TaskVM, Model.Task>(task);
+                _taskAppService.Add(newTask);
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "Name", task.CustomerId);
+            //ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "Name", task.CustomerId);
             return View(task);
         }
 
@@ -78,12 +84,15 @@ namespace OnionArchitecture.Web.Controllers
                 return NotFound();
             }
 
-            var task = await _context.Tasks.FindAsync(id);
+            var task = _mapper.Map<Model.Task, TaskVM>(_taskAppService.GetById(id.Value));
+
             if (task == null)
             {
                 return NotFound();
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "Name", task.CustomerId);
+
+            var customers = _mapper.Map<IEnumerable<Model.Task>, IEnumerable<TaskVM>>(_taskAppService.GetAll());
+            ViewData["CustomerId"] = new SelectList(customers, "Id", "Name", task.CustomerId);
             return View(task);
         }
 
@@ -92,7 +101,7 @@ namespace OnionArchitecture.Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Title,Description,CreateDate,UpdateDate,DeletedDate,isActive,CustomerId")] Model.Task task)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Title,Description,CreateDate,UpdateDate,DeletedDate,isActive,CustomerId")] TaskVM task)
         {
             if (id != task.Id)
             {
@@ -103,8 +112,8 @@ namespace OnionArchitecture.Web.Controllers
             {
                 try
                 {
-                    _context.Update(task);
-                    await _context.SaveChangesAsync();
+                    var _task = _mapper.Map<TaskVM, Model.Task>(task);
+                    _taskAppService.Update(_task);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -119,7 +128,8 @@ namespace OnionArchitecture.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "Id", "Name", task.CustomerId);
+            var customers = _mapper.Map<IEnumerable<Model.Task>, IEnumerable<TaskVM>>(_taskAppService.GetAll());
+            ViewData["CustomerId"] = new SelectList(customers, "Id", "Name", task.CustomerId);
             return View(task);
         }
 
@@ -131,9 +141,7 @@ namespace OnionArchitecture.Web.Controllers
                 return NotFound();
             }
 
-            var task = await _context.Tasks
-                .Include(t => t.Customer)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var task = _mapper.Map<Model.Task, TaskVM>(_taskAppService.GetById(id.Value));
             if (task == null)
             {
                 return NotFound();
@@ -147,15 +155,15 @@ namespace OnionArchitecture.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var task = await _context.Tasks.FindAsync(id);
-            _context.Tasks.Remove(task);
-            await _context.SaveChangesAsync();
+            var task = _taskAppService.GetById(id);
+            _taskAppService.Delete(task);
+
             return RedirectToAction(nameof(Index));
         }
 
         private bool TaskExists(Guid id)
         {
-            return _context.Tasks.Any(e => e.Id == id);
+            return _taskAppService.GetById(id) != null;
         }
     }
 }
